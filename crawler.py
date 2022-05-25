@@ -9,8 +9,6 @@ def crawling(file_path, url):
     # request로 문서 전체 가져오고 beautifulsoup으로 파싱
     soup = bs(requests.get(url).text, 'html.parser')
 
-    #root > div.Content__Background-sc-1f451g1-0.gEoQaE > div.Content__OuterWrapper-sc-1f451g1-5.eEKyye > div > div > div.ContentPane__Wrapper-sc-6et83r-0.kpTBXq > div > div > div > div.RedoPadding-sc-1rj2rww-0.gaOlpC > div.page-content.PageContent-ny9bj0-0.cXwdbF
-
     data = {}
     data['statistics'] = [] # 범용화 필요 -> url에서 book 다음에 나오는 이름으로 지정 [변경 팔요]
 

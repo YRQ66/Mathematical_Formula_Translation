@@ -1,0 +1,7 @@
+transformers==4.20.1
+datasets==2.3.2
+tokenizers==0.12.1
+sentencepiece==0.1.96
+numpy==1.23.1
+opencv-contrib-python==4.6.0.66
+pandas==1.4.3

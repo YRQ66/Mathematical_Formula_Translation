@@ -33,5 +33,6 @@ iconv -c -f ISO-8859-1 -t utf-8 im2latex_formulas.lst > im2latex_formulas_utf.ls
 └── visualize.py
 ```
 ## Quick Start
+[Code Source](https://www.kaggle.com/code/younghoshin/finetuning-trocr)
 1. python tokenizer.py -> ./data/tokenizer-wordlevel.json
 2. python train.py

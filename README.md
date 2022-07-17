@@ -32,3 +32,6 @@ iconv -c -f ISO-8859-1 -t utf-8 im2latex_formulas.lst > im2latex_formulas_utf.ls
 ├── tokenizer.py
 └── visualize.py
 ```
+## Quick Start
+1. python tokenizer.py -> ./data/tokenizer-wordlevel.json
+2. python train.py

@@ -8,7 +8,7 @@
 ```
 pip install -r requirements_all.txt
 ```
-M1 칩용 torch 버전이 다운받아져 있기 때문에 각 디바이스에 맞는 torch 버전을 따로 깔아주어야 한다. 
+torch는 Apple Silicon 버전으로 맞추어 있기 때문에 torch는 따로 install 
 - Windows
 ```
 pip install -r requirements.txt

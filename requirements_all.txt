@@ -36,6 +36,7 @@ ipython @ file:///Users/runner/miniforge3/conda-bld/ipython_1653755019776/work
 ipython-genutils==0.2.0
 jedi @ file:///Users/runner/miniforge3/conda-bld/jedi_1649067433487/work
 Jinja2 @ file:///home/conda/feedstock_root/build_artifacts/jinja2_1654302431367/work
+jiwer==2.3.0
 json5 @ file:///home/conda/feedstock_root/build_artifacts/json5_1600692310011/work
 jsonschema @ file:///home/conda/feedstock_root/build_artifacts/jsonschema-meta_1657629641118/work
 jupyter-client @ file:///home/conda/feedstock_root/build_artifacts/jupyter_client_1654730843242/work
@@ -77,6 +78,7 @@ Pygments @ file:///home/conda/feedstock_root/build_artifacts/pygments_1650904496
 pyparsing @ file:///home/conda/feedstock_root/build_artifacts/pyparsing_1652235407899/work
 pyrsistent @ file:///Users/runner/miniforge3/conda-bld/pyrsistent_1649013428463/work
 python-dateutil @ file:///home/conda/feedstock_root/build_artifacts/python-dateutil_1626286286081/work
+python-Levenshtein==0.12.2
 pytz==2022.1
 PyYAML==6.0
 pyzmq @ file:///Users/runner/miniforge3/conda-bld/pyzmq_1656183616117/work

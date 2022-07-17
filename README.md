@@ -15,3 +15,21 @@ pip install -r requirements.txt
 && 디바이스에 맞는 torch 버전 다운
 ```
 
+### Directory Structure
+```
+cd ./data
+iconv -c -f ISO-8859-1 -t utf-8 im2latex_formulas.lst > im2latex_formulas_utf.lst
+
+.
+├── data
+│   ├── formula_images_processed
+│   ├── im2latex_formulas.lst 
+│   ├── im2latex_formulas_utf.lst 
+│   ├── im2latex_test.lst
+│   ├── im2latex_train.lst
+│   ├── im2latex_validate.lst
+│   └── tokenizer-wordlevel.json
+├── preprocess.py
+├── tokenizer.py
+└── visualize.py
+```

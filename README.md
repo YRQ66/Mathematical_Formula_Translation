@@ -14,7 +14,7 @@ pip install -r requirements.txt
 ```
 
 ## Directory Structure
-[Dataset Source](https://anvilproject.org/guides/content/creating-links)
+[Dataset Source](https://zenodo.org/record/56198#.YtPD1-xBzze)
 ```
 cd ./data
 iconv -c -f ISO-8859-1 -t utf-8 im2latex_formulas.lst > im2latex_formulas_utf.lst

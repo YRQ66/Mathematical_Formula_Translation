@@ -19,18 +19,20 @@ pip install -r requirements.txt
 cd ./data
 iconv -c -f ISO-8859-1 -t utf-8 im2latex_formulas.lst > im2latex_formulas_utf.lst
 
-.
-├── data
-│   ├── formula_images_processed
-│   ├── im2latex_formulas.lst 
-│   ├── im2latex_formulas_utf.lst 
-│   ├── im2latex_test.lst
-│   ├── im2latex_train.lst
-│   ├── im2latex_validate.lst
-│   └── tokenizer-wordlevel.json
-├── preprocess.py
-├── tokenizer.py
-└── visualize.py
+im2latex
+      ├── data
+      │   ├── formula_images_processed
+      │   ├── im2latex_formulas.lst 
+      │   ├── im2latex_formulas_utf.lst 
+      │   ├── im2latex_test.lst
+      │   ├── im2latex_train.lst
+      │   ├── im2latex_validate.lst
+      │   └── tokenizer-wordlevel.json
+      ├── preprocess.py
+      ├── tokenizer.py
+      ├── visualize.py
+      ├── dataset.py
+      └── train.py
 ```
 ## Quick Start
 [Code Source](https://www.kaggle.com/code/younghoshin/finetuning-trocr)

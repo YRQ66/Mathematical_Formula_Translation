@@ -8,6 +8,7 @@
 - [ ] wandb → mlflow
 - [ ] test emr
 - [ ] I2L-140K 데이터셋 preprocessing
+- [ ] tokenizer train data로만 만들기
 
 ## Requiremets
 - Apple Silicon (M1) version

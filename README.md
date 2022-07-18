@@ -2,12 +2,12 @@
 수학 개념 매칭 프로그램 (스마일 게이트 희망스튜디오 퓨처랩 AI 부문 2기 지원 프로젝트)
 
 # TO DO
-- [ ] validation bleu(원리상 안된다고 하는데 이유 아직 모름)
-- [ ] validation cer
-- [ ] best model 저장
+- [x] validation bleu(원리상 안된다고 하는데 이유 아직 모름)
+- [x] validation cer
+- [x] best model 저장
 - [ ] wandb → mlflow
 - [ ] test emr
-- [ ] I2L-140K 데이터셋 preprocessing
+- [x] I2L-140K 데이터셋 preprocessing
 - [ ] tokenizer train data로만 만들기
 
 ## Requiremets

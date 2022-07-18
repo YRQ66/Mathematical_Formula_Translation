@@ -2,15 +2,16 @@ from re import A
 import pandas as pd
 from os.path import join
 
-def preprocess_df(formulas, data_dir, type = None, max_length_token=None):
-    pth = 'im2latex_{}.lst'.format(type)
-    df = pd.read_csv(join(data_dir, pth), header=None, sep=' ')
-    df = df.drop(2, axis=1)
-    df.rename(columns={0: "text_index", 1: "file_name"}, inplace=True)
+def preprocess_df(data_dir, type = None, max_length_token=None):
 
+    pth = 'training_56/df_{}.pkl'.format(type)
+    df = pd.read_pickle(join(data_dir, pth))
+    
+    
     # Replace text with formulas
-    df['text'] = df.apply (lambda row: formulas[int(row['text_index'])], axis=1)
-    df['len'] = df.apply (lambda row: row['text'].count(' '), axis=1)
+    # df['text'] = df.apply (lambda row: formulas[int(row['text_index'])], axis=1)
+    df['len'] = df.apply (lambda row: row['latex_ascii'].count(' '), axis=1)
+
     # Sort by ascending length of formula
     df_sorted = df.sort_values(by="len")
     df_filtered = df_sorted[df_sorted['len'] > 0 ]

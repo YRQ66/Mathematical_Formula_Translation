@@ -21,10 +21,11 @@ class IAMDataset(Dataset):
 
     def __getitem__(self, idx):
         # get file name + text 
-        file_name = self.df['file_name'][idx]
-        text = self.df['text'][idx]
+        file_name = self.df['image'][idx]
+        text = self.df['latex_ascii'][idx]
         # prepare image (i.e. resize + normalize)
-        image = Image.open(self.root_dir + file_name+'.png').convert("RGB")
+        # image = Image.open(self.root_dir + file_name +'.png').convert("RGB")
+        image = Image.open(self.root_dir + file_name).convert("RGB")
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
 #        # add labels (input_ids) by encoding the text
 #        labels = self.processor.tokenizer(text, 
@@ -39,27 +40,27 @@ class IAMDataset(Dataset):
         return encoding
 
 def prepare_dataset(data_dir, max_length_token, vocab_size):
-    formulas_file = join(data_dir, "im2latex_formulas_utf.lst")
+    formulas_file = join(data_dir, "step0/formulas.norm.filtered.txt")
     # linux 인코딩 변환 : iconv -c -f ISO-8859-1 -t utf-8 im2latex_formulas.lst > im2latex_formulas_utf.lst
-    with open(formulas_file, 'r') as f:
-        formulas = [formula.strip('\n') for formula in f.readlines()]
+    # with open(formulas_file, 'r') as f:
+    #     formulas = [formula.strip('\n') for formula in f.readlines()]
 
-    # train_df/test_df/validate_df
-    types = ['train', 'test', 'validate']
+    # train_df/test_df/valid_df
+    types = ['train', 'test', 'valid']
     for type in types:
-        df = preprocess_df(formulas, data_dir = data_dir, type = type, max_length_token=max_length_token)
+        df = preprocess_df(data_dir=data_dir, type=type, max_length_token=max_length_token)
         globals()["{}_df".format(type)] = df
 
     tokenizer_ = tokenizer(formulas_file = formulas_file, data_dir = data_dir, max_length = max_length_token, vocab_size=vocab_size)
 
-    root_dir = join(data_dir, 'formula_images_processed/',) 
+    root_dir = join(data_dir, 'formula_images/',) 
     processor = TrOCRProcessor.from_pretrained("microsoft/trocr-small-printed", Use_fast= False)
     train_dataset = IAMDataset(root_dir=root_dir,
                             df=train_df,
                             processor=processor,
                             tokenizer=tokenizer_)
     valid_dataset = IAMDataset(root_dir=root_dir,
-                            df=validate_df,
+                            df=valid_df,
                             processor=processor,
                             tokenizer=tokenizer_)
     eval_dataset = IAMDataset(root_dir=root_dir,
@@ -95,4 +96,4 @@ if __name__ == '__main__':
 
     train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
     eval_dataloader = DataLoader(eval_dataset, batch_size=args.batch_size)
-    validate_dataloader = DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=True)
+    valid_dataloader = DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=True)

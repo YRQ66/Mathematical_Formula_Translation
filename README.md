@@ -7,6 +7,7 @@
 - [ ] best model 저장
 - [ ] wandb → mlflow
 - [ ] test emr
+- [ ] I2L-140K 데이터셋 preprocessing
 
 ## Requiremets
 - Apple Silicon (M1) version

@@ -15,6 +15,7 @@ from metric import compute_cer
 from metric import get_pred_and_label_str
 import nltk
 
+import wandb
 
 # Set up environment
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -31,7 +32,7 @@ def train(args):
   # device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
   model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-small-stage1")
   model.to(device)
-
+  wandb.watch(model)
   # set special tokens used for creating the decoder_input_ids from the labels
   model.config.decoder_start_token_id = tokenizer.token_to_id("[CLS]")
   model.config.pad_token_id = tokenizer.token_to_id("[PAD]")
@@ -50,6 +51,7 @@ def train(args):
 
   optimizer = AdamW(model.parameters(), lr=5e-5)
 
+  step = 0
   for epoch in range(args.num_epoch):  # loop over the dataset multiple times
     # train
     model.train()
@@ -69,12 +71,16 @@ def train(args):
       optimizer.zero_grad()
 
       train_loss += loss.item()
-      if i % args.report_step == 0: print(f"Loss: {loss.item()}")
+      if i % args.report_step == 0: 
+        print(f"Loss: {loss.item()}")
+        wandb.log({'Train/train_loss': loss.item()})
+
 
     print(f"Loss after epoch {epoch}:", train_loss/len(train_dataloader))
-    
+
     # evaluate
     model.eval()
+    valid_loss = 0.0
     valid_cer = 0.0
     valid_bleu = 0.0 
     candidate_corpus = []
@@ -83,7 +89,11 @@ def train(args):
     with torch.no_grad():
       for i, batch in enumerate(tqdm(eval_dataloader)):
         # run batch generation
+        outputs = model(**batch)
+        # print(f'1:{outputs}')
         outputs = model.generate(batch["pixel_values"].to(device))
+
+        # print(f'2:{outputs}')
         # compute metrics
         cer = compute_cer(pred_ids=outputs, label_ids=batch["labels"], tokenizer=tokenizer)
         valid_cer += cer
@@ -105,7 +115,8 @@ def train(args):
     epoch_bleu = valid_bleu / len(eval_dataloader)
     print(f"Validation CER:{epoch_cer}")
     print(f"Validation BLEU:{epoch_bleu}")
-
+    wandb.log({'Val/val_cer': epoch_cer, 'Val/val_bleu': epoch_bleu, 'epoch':epoch})
+    
     if epoch_bleu > best_bleu:
       best_bleu = epoch_bleu
       model.save_pretrained(f"version_{args.version}/epoch_{epoch}")
@@ -114,7 +125,7 @@ def train(args):
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
-  parser.add_argument("-d", "--data_dir", default='./data')
+  parser.add_argument("-d", "--data_dir", default='./data/dataset5/')
   # tokenize
   parser.add_argument("-m", "--max_length_token", default=100)
   parser.add_argument("-v", "--vocab_size", default=600)
@@ -126,4 +137,6 @@ if __name__ == '__main__':
   parser.add_argument("-r", "--report_step", default=100)
   args = parser.parse_args()
 
+  wandb.login()
+  wandb.init(project="GOME", entity='jiwo-o', name='140k')
   train(args)

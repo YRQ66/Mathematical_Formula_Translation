@@ -46,7 +46,7 @@ def prepare_dataset(data_dir, max_length_token, vocab_size):
     #     formulas = [formula.strip('\n') for formula in f.readlines()]
 
     # train_df/test_df/valid_df
-    types = ['train', 'test', 'valid']
+    types = ['train', 'val', 'test']
     for type in types:
         df = preprocess_df(data_dir=data_dir, type=type, max_length_token=max_length_token)
         globals()["{}_df".format(type)] = df
@@ -59,15 +59,15 @@ def prepare_dataset(data_dir, max_length_token, vocab_size):
                             df=train_df,
                             processor=processor,
                             tokenizer=tokenizer_)
-    valid_dataset = IAMDataset(root_dir=root_dir,
-                            df=valid_df,
+    val_dataset = IAMDataset(root_dir=root_dir,
+                            df=val_df,
                             processor=processor,
                             tokenizer=tokenizer_)
-    eval_dataset = IAMDataset(root_dir=root_dir,
+    test_dataset = IAMDataset(root_dir=root_dir,
                             df=test_df,
                             processor=processor,
                             tokenizer=tokenizer_)
-    return train_dataset, valid_dataset, eval_dataset, tokenizer_
+    return train_dataset, val_dataset, test_dataset, tokenizer_
 
 if __name__ == '__main__':
     import argparse
@@ -80,11 +80,11 @@ if __name__ == '__main__':
     parser.add_argument("-b", "--batch_size", default=16)
     args = parser.parse_args()
 
-    train_dataset, valid_dataset, eval_dataset, tokenizer = prepare_dataset(data_dir = args.data_dir, max_length_token=args.max_length_token, vocab_size=args.vocab_size)
+    train_dataset, val_dataset, test_dataset, tokenizer = prepare_dataset(data_dir = args.data_dir, max_length_token=args.max_length_token, vocab_size=args.vocab_size)
     
     print("Number of training examples:", len(train_dataset))
-    print("Number of training examples:", len(valid_dataset))
-    print("Number of validation examples:", len(eval_dataset))
+    print("Number of validation examples:", len(val_dataset))
+    print("Number of test examples:", len(test_dataset))
 
     encoding = train_dataset[0]
     for k,v in encoding.items():
@@ -95,5 +95,5 @@ if __name__ == '__main__':
     print(label_str)
 
     train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
-    eval_dataloader = DataLoader(eval_dataset, batch_size=args.batch_size)
-    valid_dataloader = DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=True)
+    val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=True)
+    test_dataloader = DataLoader(test_dataset, batch_size=args.batch_size)

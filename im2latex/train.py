@@ -33,12 +33,19 @@ def seed_everything(seed):
 
 def train(args):
   seed_everything(args.seed)
-  train_dataset, valid_dataset, eval_dataset, tokenizer = \
+  
+  # settings
+  print("pytorch version: {}".format(torch.__version__))
+  print("GPU 사용 가능 여부: {}".format(torch.cuda.is_available()))
+  print(torch.cuda.get_device_name(0))
+  print(torch.cuda.device_count())
+
+  train_dataset, val_dataset, test_dataset, tokenizer = \
   prepare_dataset(data_dir = args.data_dir, max_length_token=args.max_length_token, vocab_size=args.vocab_size)
 
   train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
-  eval_dataloader = DataLoader(eval_dataset, batch_size=args.batch_size)
-  validate_dataloader = DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=True)
+  val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=True)
+  test_dataloader = DataLoader(test_dataset, batch_size=args.batch_size)
 
   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
   # device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
@@ -83,32 +90,31 @@ def train(args):
       optimizer.zero_grad()
 
       train_loss += loss.item()
+      if args.wandb:
+        wandb.log({'Train/train_loss': loss.item()}, step=step)
+        step += 1
       if i % args.report_step == 0: 
         print(f"Loss: {loss.item()}")
-        wandb.log({'Train/train_loss': loss.item()})
-
-
+        
     print(f"Loss after epoch {epoch}:", train_loss/len(train_dataloader))
 
-    # evaluate
-    model.eval()
-    valid_loss = 0.0
-    valid_cer = 0.0
-    valid_bleu = 0.0 
+    # validate
+    model.test()
+    val_loss = 0.0
+    val_cer = 0.0
+    val_bleu = 0.0 
     candidate_corpus = []
     references_corpus = []
     best_bleu = 0
     with torch.no_grad():
-      for i, batch in enumerate(tqdm(eval_dataloader)):
+      for i, batch in enumerate(tqdm(val_dataloader)):
         # run batch generation
-        outputs = model(**batch)
-        # print(f'1:{outputs}')
+        # outputs = model(**batch)
         outputs = model.generate(batch["pixel_values"].to(device))
 
-        # print(f'2:{outputs}')
         # compute metrics
         cer = compute_cer(pred_ids=outputs, label_ids=batch["labels"], tokenizer=tokenizer)
-        valid_cer += cer
+        val_cer += cer
 
         pred, label = get_pred_and_label_str(outputs, batch["labels"], tokenizer)
           
@@ -121,13 +127,13 @@ def train(args):
                 references_corpus, candidate_corpus,
                 weights=(0.25, 0.25, 0.25, 0.25)
         )
-        valid_bleu += bleu
+        val_bleu += bleu
 
-    epoch_cer = valid_cer / len(eval_dataloader)
-    epoch_bleu = valid_bleu / len(eval_dataloader)
-    print(f"Validation CER:{epoch_cer}")
-    print(f"Validation BLEU:{epoch_bleu}")
-    wandb.log({'Val/val_cer': epoch_cer, 'Val/val_bleu': epoch_bleu, 'epoch':epoch})
+    epoch_cer = val_cer / len(val_dataloader)
+    epoch_bleu = val_bleu / len(val_dataloader)
+    print(f"{epoch}th epoch Val CER:{epoch_cer}")
+    print(f"{epoch}th epoch Val BLEU:{epoch_bleu}")
+    wandb.log({'Val/val_cer': epoch_cer, 'Val/val_bleu': epoch_bleu, 'epoch':epoch}, step=epoch)
     
     if epoch_bleu > best_bleu:
       best_bleu = epoch_bleu
@@ -148,8 +154,9 @@ if __name__ == '__main__':
   parser.add_argument("-e", "--num_epoch", default=5, type=int)
   parser.add_argument("-r", "--report_step", default=100, type=int)
   parser.add_argument("-s", "--seed", default=1004, type=int)
+  parser.add_argument("-w", "--wandb", default=True)
   args = parser.parse_args()
 
   wandb.login()
-  wandb.init(project="GOME", entity='jiwo-o', name='140k')
+  wandb.init(project="latex-OCR", entity='gome', name='140k')
   train(args)

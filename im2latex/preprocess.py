@@ -33,7 +33,7 @@ if __name__ == '__main__':
         formulas = [formula.strip('\n') for formula in f.readlines()]
 
     # train_df/test_df/validate_df
-    types = ['train', 'test', 'validate']
+    types = ['train', 'valid', 'test']
     for type in types:
         df = preprocess_df(formulas, data_dir=args.data_dir, type = type, max_length_token=args.max_length_token)
         globals()["{}_df".format(type)] = df

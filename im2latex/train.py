@@ -51,7 +51,8 @@ def train(args):
   # device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
   model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-small-stage1")
   model.to(device)
-  wandb.watch(model)
+  if args.wandb == True:
+    wandb.watch(model)
   # set special tokens used for creating the decoder_input_ids from the labels
   model.config.decoder_start_token_id = tokenizer.token_to_id("[CLS]")
   model.config.pad_token_id = tokenizer.token_to_id("[PAD]")
@@ -90,7 +91,7 @@ def train(args):
       optimizer.zero_grad()
 
       train_loss += loss.item()
-      if args.wandb:
+      if args.wandb == True:
         wandb.log({'Train/train_loss': loss.item()}, step=step)
         step += 1
       if i % args.report_step == 0: 
@@ -133,7 +134,8 @@ def train(args):
     epoch_bleu = val_bleu / len(val_dataloader)
     print(f"{epoch}th epoch Val CER:{epoch_cer}")
     print(f"{epoch}th epoch Val BLEU:{epoch_bleu}")
-    wandb.log({'Val/val_cer': epoch_cer, 'Val/val_bleu': epoch_bleu, 'epoch':epoch}, step=epoch)
+    if args.wandb == True:
+      wandb.log({'Val/val_cer': epoch_cer, 'Val/val_bleu': epoch_bleu, 'epoch':epoch}, step=epoch)
     
     if epoch_bleu > best_bleu:
       best_bleu = epoch_bleu
@@ -154,9 +156,12 @@ if __name__ == '__main__':
   parser.add_argument("-e", "--num_epoch", default=5, type=int)
   parser.add_argument("-r", "--report_step", default=100, type=int)
   parser.add_argument("-s", "--seed", default=1004, type=int)
-  parser.add_argument("-w", "--wandb", default=True)
+  parser.add_argument("-w", "--wandb", action="store_true") # if you want to use wandb, just text --wandb
+  parser.add_argument("-n", "--name", default='140k')
   args = parser.parse_args()
-
+  
+if args.wandb == True:
   wandb.login()
-  wandb.init(project="latex-OCR", entity='gome', name='140k')
-  train(args)
+  wandb.init(project="latex-OCR", entity='gome', name=args.name)
+
+train(args)

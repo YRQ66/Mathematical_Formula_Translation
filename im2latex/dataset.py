@@ -46,7 +46,7 @@ def prepare_dataset(data_dir, max_length_token, vocab_size):
     #     formulas = [formula.strip('\n') for formula in f.readlines()]
 
     # train_df/test_df/valid_df
-    types = ['train', 'val', 'test']
+    types = ['train', 'valid', 'test']
     for type in types:
         df = preprocess_df(data_dir=data_dir, type=type, max_length_token=max_length_token)
         globals()["{}_df".format(type)] = df
@@ -60,7 +60,7 @@ def prepare_dataset(data_dir, max_length_token, vocab_size):
                             processor=processor,
                             tokenizer=tokenizer_)
     val_dataset = IAMDataset(root_dir=root_dir,
-                            df=val_df,
+                            df=valid_df,
                             processor=processor,
                             tokenizer=tokenizer_)
     test_dataset = IAMDataset(root_dir=root_dir,

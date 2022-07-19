@@ -5,6 +5,8 @@ from transformers import VisionEncoderDecoderModel
 import argparse
 import os
 from tqdm import tqdm
+import numpy as np
+import random
 
 from tokenizer import tokenizer
 from dataset import prepare_dataset
@@ -20,7 +22,17 @@ import wandb
 # Set up environment
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
+def seed_everything(seed):
+  torch.manual_seed(seed)
+  torch.cuda.manual_seed(seed)
+  torch.cuda.manual_seed_all(seed)  # if use multi-GPU
+  torch.backends.cudnn.deterministic = True
+  torch.backends.cudnn.benchmark = False
+  np.random.seed(seed)
+  random.seed(seed)
+
 def train(args):
+  seed_everything(args.seed)
   train_dataset, valid_dataset, eval_dataset, tokenizer = \
   prepare_dataset(data_dir = args.data_dir, max_length_token=args.max_length_token, vocab_size=args.vocab_size)
 
@@ -127,14 +139,15 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument("-d", "--data_dir", default='./data/dataset5/')
   # tokenize
-  parser.add_argument("-m", "--max_length_token", default=100)
-  parser.add_argument("-v", "--vocab_size", default=600)
+  parser.add_argument("-m", "--max_length_token", default=100, type=int)
+  parser.add_argument("-v", "--vocab_size", default=600, type=int)
   # dataset
-  parser.add_argument("-b", "--batch_size", default=16)
+  parser.add_argument("-b", "--batch_size", default=16, type=int)
   # training
   parser.add_argument("-i", "--version", default=5)
   parser.add_argument("-e", "--num_epoch", default=5, type=int)
-  parser.add_argument("-r", "--report_step", default=100)
+  parser.add_argument("-r", "--report_step", default=100, type=int)
+  parser.add_argument("-s", "--seed", default=1004, type=int)
   args = parser.parse_args()
 
   wandb.login()

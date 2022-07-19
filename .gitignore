@@ -1,6 +1,10 @@
 # Mac
 .DS_Store
 im2latex/data
+.json
+.yaml
+wandb
+__pycache__
 
 # 개인 코드 테스트 경로
 personal/

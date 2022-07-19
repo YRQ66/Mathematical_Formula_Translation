@@ -92,7 +92,7 @@ def train(args):
 
       train_loss += loss.item()
       if args.wandb == True:
-        wandb.log({'Train/train_loss': loss.item()}, step=step)
+        wandb.log({'Train/train_loss': loss.item(), 'epoch':epoch}, step=step)
         step += 1
       if i % args.report_step == 0: 
         print(f"Loss: {loss.item()}")
@@ -163,5 +163,6 @@ if __name__ == '__main__':
 if args.wandb == True:
   wandb.login()
   wandb.init(project="latex-OCR", entity='gome', name=args.name)
+  wandb.config.update(args)
 
 train(args)

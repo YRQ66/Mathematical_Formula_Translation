@@ -5,6 +5,7 @@ im2latex/data
 .yaml
 wandb
 __pycache__
+.ipynb
 
 # 개인 코드 테스트 경로
 personal/

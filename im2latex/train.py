@@ -18,6 +18,7 @@ from metric import get_pred_and_label_str
 import nltk
 
 import wandb
+import yaml
 
 # Set up environment
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -32,7 +33,7 @@ def seed_everything(seed):
   random.seed(seed)
 
 def train(args):
-  seed_everything(args.seed)
+  seed_everything(args['seed'])
   
   # settings
   print("pytorch version: {}".format(torch.__version__))
@@ -41,27 +42,28 @@ def train(args):
   print(torch.cuda.device_count())
 
   train_dataset, val_dataset, test_dataset, tokenizer = \
-  prepare_dataset(data_dir = args.data_dir, max_length_token=args.max_length_token, vocab_size=args.vocab_size)
+  prepare_dataset(data_dir = args['data_dir'], max_length_token=args['max_length_token'], vocab_size=args['vocab_size'])
 
-  train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
-  val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=True)
-  test_dataloader = DataLoader(test_dataset, batch_size=args.batch_size)
+  train_dataloader = DataLoader(train_dataset, batch_size=args['batch_size'], shuffle=True)
+  val_dataloader = DataLoader(val_dataset, batch_size=args['batch_size'], shuffle=True)
+  test_dataloader = DataLoader(test_dataset, batch_size=args['batch_size'])
 
-  device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-  # device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+  device = torch.device("cuda" if torch.cuda.is_available() \
+                        else "mps" if torch.backends.mps.is_available() else "cpu")
+
   model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-small-stage1")
   model.to(device)
-  if args.wandb == True:
+  if args['wandb'] == True:
     wandb.watch(model)
   # set special tokens used for creating the decoder_input_ids from the labels
   model.config.decoder_start_token_id = tokenizer.token_to_id("[CLS]")
   model.config.pad_token_id = tokenizer.token_to_id("[PAD]")
   # make sure vocab size is set correctly
-  model.config.vocab_size = args.vocab_size
+  model.config.vocab_size = args['vocab_size']
 
   # set beam search parameters
   model.config.eos_token_id = tokenizer.token_to_id("[SEP]")
-  model.config.max_length = args.max_length_token #64
+  model.config.max_length = args['max_length_token'] #64
   model.config.early_stopping = True
   model.config.no_repeat_ngram_size = 3
   model.config.length_penalty = 2.0
@@ -72,7 +74,7 @@ def train(args):
   optimizer = AdamW(model.parameters(), lr=5e-5)
 
   step = 0
-  for epoch in range(args.num_epoch):  # loop over the dataset multiple times
+  for epoch in range(args['num_epoch']):  # loop over the dataset multiple times
     # train
     model.train()
     train_loss = 0.0
@@ -91,33 +93,42 @@ def train(args):
       optimizer.zero_grad()
 
       train_loss += loss.item()
-      if args.wandb == True:
+      if args['wandb'] == True:
         wandb.log({'Train/train_loss': loss.item(), 'epoch':epoch}, step=step)
         step += 1
-      if i % args.report_step == 0: 
+      break
+      if i % args['report_step'] == 0: 
         print(f"Loss: {loss.item()}")
         
     print(f"Loss after epoch {epoch}:", train_loss/len(train_dataloader))
 
     # validate
-    model.test()
+    model.eval()
     val_loss = 0.0
     val_cer = 0.0
     val_bleu = 0.0 
     candidate_corpus = []
     references_corpus = []
-    best_bleu = 0
+    best_cer = int(1e9)
     with torch.no_grad():
       for i, batch in enumerate(tqdm(val_dataloader)):
-        # run batch generation
-        # outputs = model(**batch)
-        outputs = model.generate(batch["pixel_values"].to(device))
+        # generate ver.
+        # generate output : sequence of token, scores(optional)
+        # outputs = model.generate(batch["pixel_values"].to(device))
+
+        for k,v in batch.items():
+          batch[k] = v.to(device)
+        outputs = model(**batch)
+        # greedy 
+        prediction = torch.argmax(outputs.logits, dim=2)
 
         # compute metrics
-        cer = compute_cer(pred_ids=outputs, label_ids=batch["labels"], tokenizer=tokenizer)
+        loss = outputs.loss.item()
+        val_loss += loss
+        cer = compute_cer(pred_ids=prediction, label_ids=batch["labels"], tokenizer=tokenizer)
         val_cer += cer
 
-        pred, label = get_pred_and_label_str(outputs, batch["labels"], tokenizer)
+        pred, label = get_pred_and_label_str(prediction, batch["labels"], tokenizer)
           
         for s in pred: s = s.split(" ")
         for s in label: s = s.split(" ")
@@ -130,39 +141,34 @@ def train(args):
         )
         val_bleu += bleu
 
+    epoch_loss = val_loss / len(val_dataloader)
     epoch_cer = val_cer / len(val_dataloader)
     epoch_bleu = val_bleu / len(val_dataloader)
+    print(f"{epoch}th epoch Val Loss:{epoch_loss}")
     print(f"{epoch}th epoch Val CER:{epoch_cer}")
     print(f"{epoch}th epoch Val BLEU:{epoch_bleu}")
-    if args.wandb == True:
-      wandb.log({'Val/val_cer': epoch_cer, 'Val/val_bleu': epoch_bleu, 'epoch':epoch}, step=epoch)
+    if args['wandb'] == True:
+      wandb.log({'Val/val_loss': epoch_loss, 'Val/val_cer': epoch_cer, 'Val/val_bleu': epoch_bleu, 'epoch':epoch}, step=epoch)
     
-    if epoch_bleu > best_bleu:
-      best_bleu = epoch_bleu
-      model.save_pretrained(f"version_{args.version}/epoch_{epoch}")
+    if epoch_cer < best_cer:
+      best_cer = epoch_cer
+      model.save_pretrained(f"version_{args['version']}/epoch_{epoch}")
 
 # model.save_pretrained(f"version_{args.version}/final")
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
-  parser.add_argument("-d", "--data_dir", default='./data/dataset5/')
-  # tokenize
-  parser.add_argument("-m", "--max_length_token", default=100, type=int)
-  parser.add_argument("-v", "--vocab_size", default=600, type=int)
-  # dataset
-  parser.add_argument("-b", "--batch_size", default=16, type=int)
-  # training
-  parser.add_argument("-i", "--version", default=5)
-  parser.add_argument("-e", "--num_epoch", default=5, type=int)
-  parser.add_argument("-r", "--report_step", default=100, type=int)
-  parser.add_argument("-s", "--seed", default=1004, type=int)
-  parser.add_argument("-w", "--wandb", action="store_true") # if you want to use wandb, just text --wandb
-  parser.add_argument("-n", "--name", default='140k')
-  args = parser.parse_args()
-  
-if args.wandb == True:
-  wandb.login()
-  wandb.init(project="latex-OCR", entity='gome', name=args.name)
-  wandb.config.update(args)
 
-train(args)
+  parser.add_argument('--config_train', default='config/config_train.yaml', type=str, help='path of train configuration yaml file')
+  
+  pre_args = parser.parse_args()
+
+  with open(pre_args.config_train) as f:
+    args = yaml.load(f, Loader=yaml.FullLoader)
+
+  if args['wandb'] == True:
+    wandb.login()
+    wandb.init(project="latex-OCR", entity='gome', name=args['name'])
+    wandb.config.update(args)
+
+  train(args)

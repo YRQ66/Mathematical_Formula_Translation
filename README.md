@@ -9,6 +9,7 @@
 - [ ] test emr
 - [x] I2L-140K 데이터셋 preprocessing
 - [ ] tokenizer train data로만 만들기
+- [ ] 새로 생성한 데이터셋 validation으로 성능 
 
 ## Requiremets
 - Apple Silicon (M1) version

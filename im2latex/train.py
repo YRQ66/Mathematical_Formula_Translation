@@ -96,7 +96,7 @@ def train(args):
       if args['wandb'] == True:
         wandb.log({'Train/train_loss': loss.item(), 'epoch':epoch}, step=step)
         step += 1
-      break
+      
       if i % args['report_step'] == 0: 
         print(f"Loss: {loss.item()}")
         

@@ -2,7 +2,6 @@ from PIL import Image
 from os.path import join, isfile
 from preprocess import preprocess_df
 from tokenizer import tokenizer
-from transformers import PreTrainedTokenizerFast
 
 import json
 

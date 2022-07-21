@@ -54,6 +54,7 @@ def prepare_dataset(data_dir, max_length_token, vocab_size):
 
     tokenizer_file = 'data/tokenizer-wordlevel.json'
     if isfile(tokenizer_file):
+        print("----- Skip tokenizer training -----")
         with open("data/tokenizer-wordlevel.json", "r") as file:
             tokenizer_ = json.load(file)    
     else:

@@ -15,7 +15,7 @@ from transformers import AdamW
 
 from metric import compute_cer
 from metric import get_pred_and_label_str
-import nltk
+from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
 
 import wandb
 import yaml
@@ -76,33 +76,34 @@ def train(args):
   step = 0
   for epoch in range(args['num_epoch']):  # loop over the dataset multiple times
     # train
-    model.train()
-    train_loss = 0.0
-    for i, batch in enumerate(tqdm(train_dataloader)):
-      # get the inputs
-      # batch: {'pixel_values': (batch_size, 3, 384, 384), 'labels':(batch_size, 100)}
-      for k,v in batch.items():
-        batch[k] = v.to(device)
+    # model.train()
+    # train_loss = 0.0
+    # for i, batch in enumerate(tqdm(train_dataloader)):
+    #   # get the inputs
+    #   # batch: {'pixel_values': (batch_size, 3, 384, 384), 'labels':(batch_size, 100)}
+    #   for k,v in batch.items():
+    #     batch[k] = v.to(device)
 
-      # forward + backward + optimize
-      # outputs : (loss, logit)  
-      outputs = model(**batch)
-      loss = outputs.loss
-      loss.backward()
-      optimizer.step()
-      optimizer.zero_grad()
+    #   # forward + backward + optimize
+    #   # outputs : (loss, logit)  
+    #   outputs = model(**batch)
+    #   loss = outputs.loss
+    #   loss.backward()
+    #   optimizer.step()
+    #   optimizer.zero_grad()
 
-      train_loss += loss.item()
-      if args['wandb'] == True:
-        wandb.log({'Train/train_loss': loss.item(), 'epoch':epoch}, step=step)
-        step += 1
+    #   train_loss += loss.item()
+    #   if args['wandb'] == True:
+    #     wandb.log({'Train/train_loss': loss.item(), 'epoch':epoch}, step=step)
+    #     step += 1
       
-      if i % args['report_step'] == 0: 
-        print(f"Loss: {loss.item()}")
+    #   if i % args['report_step'] == 0: 
+    #     print(f"Loss: {loss.item()}")
         
-    print(f"Loss after epoch {epoch}:", train_loss/len(train_dataloader))
+    # print(f"Loss after epoch {epoch}:", train_loss/len(train_dataloader))
 
     # validate
+    print(f'Start {epoch}th evaluation!!!')
     model.eval()
     val_loss = 0.0
     val_cer = 0.0
@@ -135,11 +136,13 @@ def train(args):
         candidate_corpus.extend(pred)
         references_corpus.extend(label)
     
-        bleu =  nltk.translate.bleu_score.corpus_bleu(
+        bleu =  corpus_bleu(
                 references_corpus, candidate_corpus,
-                weights=(0.25, 0.25, 0.25, 0.25)
+                weights=(0.25, 0.25, 0.25, 0.25),
+                smoothing_function=SmoothingFunction().method1
         )
         val_bleu += bleu
+        break
 
     epoch_loss = val_loss / len(val_dataloader)
     epoch_cer = val_cer / len(val_dataloader)
@@ -148,7 +151,7 @@ def train(args):
     print(f"{epoch}th epoch Val CER:{epoch_cer}")
     print(f"{epoch}th epoch Val BLEU:{epoch_bleu}")
     if args['wandb'] == True:
-      wandb.log({'Val/val_loss': epoch_loss, 'Val/val_cer': epoch_cer, 'Val/val_bleu': epoch_bleu, 'epoch':epoch}, step=epoch)
+      wandb.log({'Val/val_loss': epoch_loss, 'Val/val_cer': epoch_cer, 'Val/val_bleu': epoch_bleu, 'epoch':epoch}, step=step)
     
     if epoch_cer < best_cer:
       best_cer = epoch_cer

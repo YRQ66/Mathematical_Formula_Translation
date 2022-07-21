@@ -8,7 +8,6 @@ from tqdm import tqdm
 import numpy as np
 import random
 
-from tokenizer import tokenizer
 from dataset import prepare_dataset
 
 from transformers import AdamW
@@ -37,7 +36,8 @@ def train(args):
   
   # settings
   print("pytorch version: {}".format(torch.__version__))
-  print("GPU 사용 가능 여부: {}".format(torch.cuda.is_available()))
+  gpu = torch.cuda.is_available() or torch.backends.mps.is_available()
+  print("GPU 사용 가능 여부: {}".format(gpu))
   print(torch.cuda.get_device_name(0))
   print(torch.cuda.device_count())
 

@@ -1,13 +1,14 @@
 # Mac
 .DS_Store
 im2latex/data
-.json
-.yaml
+*.json
+*.yaml
+*.ipynb
+*.bin
 wandb
-__pycache__
-.ipynb
+__pycache__/
 config/
-version*
+version*/
 
 # 개인 코드 테스트 경로
 personal/

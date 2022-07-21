@@ -76,31 +76,31 @@ def train(args):
   step = 0
   for epoch in range(args['num_epoch']):  # loop over the dataset multiple times
     # train
-    # model.train()
-    # train_loss = 0.0
-    # for i, batch in enumerate(tqdm(train_dataloader)):
-    #   # get the inputs
-    #   # batch: {'pixel_values': (batch_size, 3, 384, 384), 'labels':(batch_size, 100)}
-    #   for k,v in batch.items():
-    #     batch[k] = v.to(device)
+    model.train()
+    train_loss = 0.0
+    for i, batch in enumerate(tqdm(train_dataloader)):
+      # get the inputs
+      # batch: {'pixel_values': (batch_size, 3, 384, 384), 'labels':(batch_size, 100)}
+      for k,v in batch.items():
+        batch[k] = v.to(device)
 
-    #   # forward + backward + optimize
-    #   # outputs : (loss, logit)  
-    #   outputs = model(**batch)
-    #   loss = outputs.loss
-    #   loss.backward()
-    #   optimizer.step()
-    #   optimizer.zero_grad()
+      # forward + backward + optimize
+      # outputs : (loss, logit)  
+      outputs = model(**batch)
+      loss = outputs.loss
+      loss.backward()
+      optimizer.step()
+      optimizer.zero_grad()
 
-    #   train_loss += loss.item()
-    #   if args['wandb'] == True:
-    #     wandb.log({'Train/train_loss': loss.item(), 'epoch':epoch}, step=step)
-    #     step += 1
+      train_loss += loss.item()
+      if args['wandb'] == True:
+        wandb.log({'Train/train_loss': loss.item(), 'epoch':epoch}, step=step)
+        step += 1
       
-    #   if i % args['report_step'] == 0: 
-    #     print(f"Loss: {loss.item()}")
+      if i % args['report_step'] == 0: 
+        print(f"Loss: {loss.item()}")
         
-    # print(f"Loss after epoch {epoch}:", train_loss/len(train_dataloader))
+    print(f"Loss after epoch {epoch}:", train_loss/len(train_dataloader))
 
     # validate
     print(f'Start {epoch}th evaluation!!!')
@@ -142,7 +142,6 @@ def train(args):
                 smoothing_function=SmoothingFunction().method1
         )
         val_bleu += bleu
-        break
 
     epoch_loss = val_loss / len(val_dataloader)
     epoch_cer = val_cer / len(val_dataloader)

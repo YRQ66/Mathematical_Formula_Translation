@@ -8,3 +8,4 @@ seed: 1004
 version: 1
 vocab_size: 600
 wandb: True
+tokenizer: True

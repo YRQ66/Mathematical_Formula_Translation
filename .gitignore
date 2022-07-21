@@ -3,11 +3,11 @@
 im2latex/data
 *.json
 *.yaml
+!config_ex.yaml
 *.ipynb
 *.bin
 wandb
 __pycache__/
-config/
 version*/
 
 # 개인 코드 테스트 경로

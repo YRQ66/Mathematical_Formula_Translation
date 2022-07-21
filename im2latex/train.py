@@ -129,34 +129,35 @@ def train(args):
         cer = compute_cer(pred_ids=prediction, label_ids=batch["labels"], tokenizer=tokenizer)
         val_cer += cer
 
-        pred, label = get_pred_and_label_str(prediction, batch["labels"], tokenizer)
+        # pred, label = get_pred_and_label_str(prediction, batch["labels"], tokenizer)
           
-        for s in pred: s = s.split(" ")
-        for s in label: s = s.split(" ")
-        candidate_corpus.extend(pred)
-        references_corpus.extend(label)
+        # for s in pred: s = s.split(" ")
+        # for s in label: s = s.split(" ")
+        # candidate_corpus.extend(pred)
+        # references_corpus.extend(label)
     
-        bleu =  corpus_bleu(
-                references_corpus, candidate_corpus,
-                weights=(0.25, 0.25, 0.25, 0.25),
-                smoothing_function=SmoothingFunction().method1
-        )
-        val_bleu += bleu
+        # bleu =  corpus_bleu(
+        #         references_corpus, candidate_corpus,
+        #         weights=(0.25, 0.25, 0.25, 0.25),
+        #         smoothing_function=SmoothingFunction().method1
+        # )
+        # val_bleu += bleu
 
     epoch_loss = val_loss / len(val_dataloader)
     epoch_cer = val_cer / len(val_dataloader)
-    epoch_bleu = val_bleu / len(val_dataloader)
+    # epoch_bleu = val_bleu / len(val_dataloader)
     print(f"{epoch}th epoch Val Loss:{epoch_loss}")
     print(f"{epoch}th epoch Val CER:{epoch_cer}")
-    print(f"{epoch}th epoch Val BLEU:{epoch_bleu}")
+    # print(f"{epoch}th epoch Val BLEU:{epoch_bleu}")
     if args['wandb'] == True:
-      wandb.log({'Val/val_loss': epoch_loss, 'Val/val_cer': epoch_cer, 'Val/val_bleu': epoch_bleu, 'epoch':epoch}, step=step)
+      wandb.log({'Val/val_loss': epoch_loss, 
+                  'Val/val_cer': epoch_cer, 
+                  # 'Val/val_bleu': epoch_bleu, 
+                  'epoch':epoch}, step=step)
     
     if epoch_cer < best_cer:
       best_cer = epoch_cer
-      model.save_pretrained(f"version_{args['version']}/epoch_{epoch}")
-
-# model.save_pretrained(f"version_{args.version}/final")
+      model.save_pretrained(f"{args['name']}/epoch_{epoch}")
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()

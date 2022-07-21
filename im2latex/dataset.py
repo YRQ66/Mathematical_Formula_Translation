@@ -54,13 +54,8 @@ def prepare_dataset(data_dir, max_length_token, vocab_size):
         df = preprocess_df(data_dir=data_dir, type=type, max_length_token=max_length_token)
         globals()["{}_df".format(type)] = df
 
-    tokenizer_file = 'data/tokenizer-wordlevel.json'
-    if isfile(tokenizer_file):
-        print("----- Skip tokenizer training -----")
-        tokenizer_ = PreTrainedTokenizerFast(tokenizer_file=tokenizer_file)
-    else:
-        tokenizer_ = tokenizer(formulas_file = formulas_file, data_dir = data_dir, max_length = max_length_token, vocab_size=vocab_size)
-
+    tokenizer_ = tokenizer(formulas_file = formulas_file, data_dir = data_dir, max_length = max_length_token, vocab_size=vocab_size)
+    
     root_dir = join(data_dir, 'formula_images/',) 
     processor = TrOCRProcessor.from_pretrained("microsoft/trocr-small-printed", Use_fast= False)
     train_dataset = IAMDataset(root_dir=root_dir,

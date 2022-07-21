@@ -5,6 +5,5 @@ name: 140k
 num_epoch: 5
 report_step: 100
 seed: 1004
-version: 1
 vocab_size: 600
 wandb: True

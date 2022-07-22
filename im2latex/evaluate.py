@@ -1,7 +1,7 @@
 from ntpath import join
 import torch
 from torch.utils.data import DataLoader
-from transformers import AutoConfig, VisionEncoderDecoderModel, AutoModel , VisionEncoderDecoderConfig
+from transformers import VisionEncoderDecoderModel, VisionEncoderDecoderConfig
 
 import argparse
 import os
@@ -74,7 +74,7 @@ def compute_bleu(args):
 
   step = 0
   # validate
-  print(f'Start evaluation!!!')
+  print(f'Start evaluation_nltk!!!')
   model.eval()
   val_bleu = 0.0 
   candidate_corpus = []
@@ -92,14 +92,12 @@ def compute_bleu(args):
       outputs = model.generate(batch["pixel_values"].to(device))
 
       pred, label = get_pred_and_label_str(outputs, batch["labels"], tokenizer)
-        
-      for s in pred: s = s.split(" ")
-      for s in label: s = s.split(" ")
-      candidate_corpus.extend(pred)
-      references_corpus.extend(label)
-  
+
+      # candidate_corpus.extend(pred)
+      # references_corpus.extend(label)
+      
       bleu =  corpus_bleu(
-              references_corpus, candidate_corpus,
+              label, pred,
               weights=(0.25, 0.25, 0.25, 0.25),
               smoothing_function=SmoothingFunction().method1
       )
@@ -108,6 +106,7 @@ def compute_bleu(args):
         wandb.log({
                     'Val/val_iter_bleu': bleu, 
                 }, step=step)
+        step += 1
 
 
   epoch_bleu = val_bleu / len(eval_dataloader)

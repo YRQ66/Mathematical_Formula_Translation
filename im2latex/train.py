@@ -45,7 +45,7 @@ def train(args):
   prepare_dataset(data_dir = args['data_dir'], max_length_token=args['max_length_token'], vocab_size=args['vocab_size'])
 
   train_dataloader = DataLoader(train_dataset, batch_size=args['batch_size'], shuffle=True)
-  val_dataloader = DataLoader(val_dataset, batch_size=args['batch_size'], shuffle=True)
+  val_dataloader = DataLoader(val_dataset, batch_size=args['batch_size'])
   test_dataloader = DataLoader(test_dataset, batch_size=args['batch_size'])
 
   device = torch.device("cuda" if torch.cuda.is_available() \

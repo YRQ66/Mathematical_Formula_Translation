@@ -42,7 +42,8 @@ def train(args):
   print(torch.cuda.device_count())
 
   train_dataset, val_dataset, test_dataset, tokenizer = \
-  prepare_dataset(data_dir = args['data_dir'], max_length_token=args['max_length_token'], vocab_size=args['vocab_size'])
+  prepare_dataset(data_dir = args['data_dir'], max_length_token=args['max_length_token'], \
+                  vocab_size=args['vocab_size'], model_path=args['model_path'])
 
   train_dataloader = DataLoader(train_dataset, batch_size=args['batch_size'], shuffle=True)
   val_dataloader = DataLoader(val_dataset, batch_size=args['batch_size'])
@@ -51,15 +52,10 @@ def train(args):
   device = torch.device("cuda" if torch.cuda.is_available() \
                         else "mps" if torch.backends.mps.is_available() else "cpu")
 
-  if args['model_path']:
-    print(f"-----Use user's pretrained weight : {args['model_path']}-----")
-    model_config = VisionEncoderDecoderConfig.from_pretrained(args['model_path'])
-    model = VisionEncoderDecoderModel.from_pretrained(args['model_path'],
-                                    config=model_config)
-  else:
-    print('-----Use microsoft weight : trocr-small-stage1-----')
-    model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-small-stage1")
-  
+  print(f"----- Use pretrained weight : {args['model_path']} -----")
+  model_config = VisionEncoderDecoderConfig.from_pretrained(args['model_path'])
+  model = VisionEncoderDecoderModel.from_pretrained(args['model_path'],
+                                  config=model_config)
   model.to(device)
   if args['wandb'] == True:
     wandb.watch(model)

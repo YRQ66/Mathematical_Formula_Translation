@@ -56,6 +56,7 @@ def prepare_dataset(data_dir, max_length_token, vocab_size, dataset_type='140K')
         df_dir = '{}.pkl'.format(type)
         df = pd.read_pickle(join(dataset_dir, df_dir))
         globals()["{}_df".format(type)] = df
+        
 
     tokenizer_ = tokenizer(formulas_file = formulas_file, data_dir = data_dir, max_length = max_length_token, vocab_size=vocab_size)
     

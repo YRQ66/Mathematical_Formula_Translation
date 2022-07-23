@@ -1,7 +1,7 @@
 from ntpath import join
 import torch
 from torch.utils.data import DataLoader
-from transformers import AutoConfig, VisionEncoderDecoderModel, AutoModel , VisionEncoderDecoderConfig
+from transformers import VisionEncoderDecoderModel, VisionEncoderDecoderConfig
 
 import argparse
 import os
@@ -12,7 +12,7 @@ import random
 from dataset import prepare_dataset
 
 from metric import get_pred_and_label_str
-from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
+from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction, sentence_bleu
 
 import wandb
 import yaml
@@ -74,11 +74,9 @@ def compute_bleu(args):
 
   step = 0
   # validate
-  print(f'Start evaluation!!!')
+  print(f'Start evaluation_nltk!!!')
   model.eval()
   val_bleu = 0.0 
-  candidate_corpus = []
-  references_corpus = []
   
   with torch.no_grad():
     for i, batch in enumerate(tqdm(eval_dataloader)):
@@ -90,24 +88,23 @@ def compute_bleu(args):
       
       # beam search
       outputs = model.generate(batch["pixel_values"].to(device))
-
       pred, label = get_pred_and_label_str(outputs, batch["labels"], tokenizer)
-        
-      for s in pred: s = s.split(" ")
-      for s in label: s = s.split(" ")
-      candidate_corpus.extend(pred)
-      references_corpus.extend(label)
-  
+
+      label = [[l] for l in label]
+      
       bleu =  corpus_bleu(
-              references_corpus, candidate_corpus,
+              label, pred,
               weights=(0.25, 0.25, 0.25, 0.25),
               smoothing_function=SmoothingFunction().method1
       )
+      
       val_bleu += bleu
+
       if args['wandb'] == True:
         wandb.log({
                     'Val/val_iter_bleu': bleu, 
                 }, step=step)
+        step += 1
 
 
   epoch_bleu = val_bleu / len(eval_dataloader)

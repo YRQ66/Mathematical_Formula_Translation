@@ -1,10 +1,11 @@
-batch_size: 10
+batch_size: 1
 data_dir: ./data/dataset5/
 max_length_token: 100
-name: 140k
+name: eval_bleu
 num_epoch: 5
 report_step: 100
 seed: 1004
-version: 1
 vocab_size: 600
-wandb: True
+wandb: False
+mode: 'val' # 'val' or 'test'
+model_path: 'model/epoch_9'

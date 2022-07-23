@@ -1,0 +1,10 @@
+batch_size: 16
+data_dir: ./data/dataset5/
+max_length_token: 100
+name: 140k
+num_epoch: 5
+report_step: 100
+seed: 1004
+vocab_size: 600
+wandb: True
+model_path: 'model/epoch_9' # or None

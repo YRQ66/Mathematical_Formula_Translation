@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
-from transformers import VisionEncoderDecoderModel
+from transformers import VisionEncoderDecoderModel, VisionEncoderDecoderConfig
 
 import argparse
 import os
@@ -8,14 +8,13 @@ from tqdm import tqdm
 import numpy as np
 import random
 
-from tokenizer import tokenizer
 from dataset import prepare_dataset
 
 from transformers import AdamW
 
 from metric import compute_cer
 from metric import get_pred_and_label_str
-import nltk
+from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
 
 import wandb
 import yaml
@@ -37,7 +36,8 @@ def train(args):
   
   # settings
   print("pytorch version: {}".format(torch.__version__))
-  print("GPU 사용 가능 여부: {}".format(torch.cuda.is_available()))
+  gpu = torch.cuda.is_available() or torch.backends.mps.is_available()
+  print("GPU 사용 가능 여부: {}".format(gpu))
   print(torch.cuda.get_device_name(0))
   print(torch.cuda.device_count())
 
@@ -45,13 +45,21 @@ def train(args):
   prepare_dataset(data_dir = args['data_dir'], max_length_token=args['max_length_token'], vocab_size=args['vocab_size'])
 
   train_dataloader = DataLoader(train_dataset, batch_size=args['batch_size'], shuffle=True)
-  val_dataloader = DataLoader(val_dataset, batch_size=args['batch_size'], shuffle=True)
+  val_dataloader = DataLoader(val_dataset, batch_size=args['batch_size'])
   test_dataloader = DataLoader(test_dataset, batch_size=args['batch_size'])
 
   device = torch.device("cuda" if torch.cuda.is_available() \
                         else "mps" if torch.backends.mps.is_available() else "cpu")
 
-  model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-small-stage1")
+  if args['model_path']:
+    print(f"-----Use user's pretrained weight : {args['model_path']}-----")
+    model_config = VisionEncoderDecoderConfig.from_pretrained(args['model_path'])
+    model = VisionEncoderDecoderModel.from_pretrained(args['model_path'],
+                                    config=model_config)
+  else:
+    print('-----Use microsoft weight : trocr-small-stage1-----')
+    model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-small-stage1")
+  
   model.to(device)
   if args['wandb'] == True:
     wandb.watch(model)
@@ -96,19 +104,17 @@ def train(args):
       if args['wandb'] == True:
         wandb.log({'Train/train_loss': loss.item(), 'epoch':epoch}, step=step)
         step += 1
-      break
+      
       if i % args['report_step'] == 0: 
         print(f"Loss: {loss.item()}")
         
     print(f"Loss after epoch {epoch}:", train_loss/len(train_dataloader))
 
     # validate
+    print(f'Start {epoch}th evaluation!!!')
     model.eval()
     val_loss = 0.0
     val_cer = 0.0
-    val_bleu = 0.0 
-    candidate_corpus = []
-    references_corpus = []
     best_cer = int(1e9)
     with torch.no_grad():
       for i, batch in enumerate(tqdm(val_dataloader)):
@@ -128,33 +134,18 @@ def train(args):
         cer = compute_cer(pred_ids=prediction, label_ids=batch["labels"], tokenizer=tokenizer)
         val_cer += cer
 
-        pred, label = get_pred_and_label_str(prediction, batch["labels"], tokenizer)
-          
-        for s in pred: s = s.split(" ")
-        for s in label: s = s.split(" ")
-        candidate_corpus.extend(pred)
-        references_corpus.extend(label)
-    
-        bleu =  nltk.translate.bleu_score.corpus_bleu(
-                references_corpus, candidate_corpus,
-                weights=(0.25, 0.25, 0.25, 0.25)
-        )
-        val_bleu += bleu
-
     epoch_loss = val_loss / len(val_dataloader)
     epoch_cer = val_cer / len(val_dataloader)
-    epoch_bleu = val_bleu / len(val_dataloader)
     print(f"{epoch}th epoch Val Loss:{epoch_loss}")
     print(f"{epoch}th epoch Val CER:{epoch_cer}")
-    print(f"{epoch}th epoch Val BLEU:{epoch_bleu}")
     if args['wandb'] == True:
-      wandb.log({'Val/val_loss': epoch_loss, 'Val/val_cer': epoch_cer, 'Val/val_bleu': epoch_bleu, 'epoch':epoch}, step=epoch)
+      wandb.log({'Val/val_loss': epoch_loss, 
+                  'Val/val_cer': epoch_cer, 
+                  'epoch':epoch}, step=step)
     
     if epoch_cer < best_cer:
       best_cer = epoch_cer
-      model.save_pretrained(f"version_{args['version']}/epoch_{epoch}")
-
-# model.save_pretrained(f"version_{args.version}/final")
+      model.save_pretrained(f"model/{args['name']}/epoch_{epoch}")
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()

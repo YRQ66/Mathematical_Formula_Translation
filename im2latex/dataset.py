@@ -1,8 +1,10 @@
 import pandas as pd
 from PIL import Image
-from os.path import join
+from os.path import join, isfile
 from preprocess import preprocess_df
 from tokenizer import tokenizer
+
+import json
 
 import torch
 from torch.utils.data import Dataset
@@ -54,9 +56,9 @@ def prepare_dataset(data_dir, max_length_token, vocab_size, dataset_type='140K')
         df_dir = '{}.pkl'.format(type)
         df = pd.read_pickle(join(dataset_dir, df_dir))
         globals()["{}_df".format(type)] = df
+        
 
     tokenizer_ = tokenizer(formulas_file = formulas_file, data_dir = data_dir, max_length = max_length_token, vocab_size=vocab_size)
-
     root_dir = join(dataset_dir, 'images/',) 
     processor = TrOCRProcessor.from_pretrained("microsoft/trocr-small-printed", Use_fast= False)
     train_dataset = IAMDataset(root_dir=root_dir,

@@ -1,3 +1,4 @@
+import pandas as pd
 from PIL import Image
 from os.path import join, isfile
 from preprocess import preprocess_df
@@ -24,7 +25,7 @@ class IAMDataset(Dataset):
     def __getitem__(self, idx):
         # get file name + text 
         file_name = self.df['image'][idx]
-        text = self.df['latex_ascii'][idx]
+        text = self.df['formula'][idx]
         # prepare image (i.e. resize + normalize)
         # image = Image.open(self.root_dir + file_name +'.png').convert("RGB")
         image = Image.open(self.root_dir + file_name).convert("RGB")
@@ -41,22 +42,24 @@ class IAMDataset(Dataset):
         encoding = {"pixel_values": pixel_values.squeeze(), "labels": torch.tensor(labels)}
         return encoding
 
-def prepare_dataset(data_dir, max_length_token, vocab_size):
-    formulas_file = join(data_dir, "step0/formulas.norm.filtered.txt")
+def prepare_dataset(data_dir, max_length_token, vocab_size, dataset_type='140K'):
+
+    dataset_dir = join(data_dir, dataset_type)
+    formulas_file = join(dataset_dir, "formulas.txt")
     # linux 인코딩 변환 : iconv -c -f ISO-8859-1 -t utf-8 im2latex_formulas.lst > im2latex_formulas_utf.lst
-    # with open(formulas_file, 'r') as f:
-    #     formulas = [formula.strip('\n') for formula in f.readlines()]
+    with open(formulas_file, 'r') as f:
+        formulas = [formula.strip('\n') for formula in f.readlines()]
 
     # train_df/test_df/valid_df
     types = ['train', 'valid', 'test']
     for type in types:
-        df = preprocess_df(data_dir=data_dir, type=type, max_length_token=max_length_token)
+        df_dir = '{}.pkl'.format(type)
+        df = pd.read_pickle(join(dataset_dir, df_dir))
         globals()["{}_df".format(type)] = df
         
 
     tokenizer_ = tokenizer(formulas_file = formulas_file, data_dir = data_dir, max_length = max_length_token, vocab_size=vocab_size)
-    
-    root_dir = join(data_dir, 'formula_images/',) 
+    root_dir = join(dataset_dir, 'images/',) 
     processor = TrOCRProcessor.from_pretrained("microsoft/trocr-small-printed", Use_fast= False)
     train_dataset = IAMDataset(root_dir=root_dir,
                             df=train_df,
@@ -95,7 +98,6 @@ if __name__ == '__main__':
     labels = encoding['labels']
     labels[labels == -100] = tokenizer.token_to_id("[PAD]")
     label_str = tokenizer.decode(labels.tolist(), skip_special_tokens=True)
-    print(label_str)
 
     train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
     val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=True)

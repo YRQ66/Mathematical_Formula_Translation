@@ -28,21 +28,42 @@ pip install -r requirements.txt
 ```
 cd ./data
 iconv -c -f ISO-8859-1 -t utf-8 im2latex_formulas.lst > im2latex_formulas_utf.lst
-
-im2latex
-      ├── data
-      │   ├── formula_images_processed
-      │   ├── im2latex_formulas.lst 
-      │   ├── im2latex_formulas_utf.lst 
-      │   ├── im2latex_test.lst
-      │   ├── im2latex_train.lst
-      │   ├── im2latex_validate.lst
-      │   └── tokenizer-wordlevel.json
-      ├── preprocess.py
-      ├── tokenizer.py
-      ├── visualize.py
-      ├── dataset.py
-      └── train.py
+.
+├── README.md
+├── im2latex
+│   ├── config
+│   │   ├── config_eval_ex.yaml
+│   │   └── config_train_ex.yaml
+│   ├── create_dataset
+│   ├── data
+│   │   ├── 100K
+│   │   │   ├── formulas.lst
+│   │   │   ├── images
+│   │   │   ├── readme.txt
+│   │   │   ├── test.lst
+│   │   │   ├── train.lst
+│   │   │   └── valid.lst
+│   │   ├── 140K
+│   │   │   ├── formulas.txt
+│   │   │   ├── images
+│   │   │   ├── test.pkl
+│   │   │   ├── train.pkl
+│   │   │   ├── valid.pkl
+│   │   │   └── tokenizer-wordlevel.json
+│   ├── dataset.py
+│   ├── evaluate.py
+│   ├── metric.py
+│   ├── preprocess.py
+│   ├── requirements.txt
+│   ├── requirements_all.txt
+│   ├── tokenizer.py
+│   ├── train.py
+│   └── visualize.py
+└── mathmatch
+    └── data_building
+        ├── crawler.py
+        └── data
+            └── crawling_data.json
 ```
 ## Quick Start
 [Code Source](https://www.kaggle.com/code/younghoshin/finetuning-trocr)

@@ -59,8 +59,7 @@ def prepare_dataset(data_dir, max_length_token, vocab_size, dataset_type='140K')
         
 
     tokenizer_ = tokenizer(formulas_file = formulas_file, data_dir = data_dir, max_length = max_length_token, vocab_size=vocab_size)
-    
-    root_dir = join(data_dir, 'images/',) 
+    root_dir = join(dataset_dir, 'images/',) 
     processor = TrOCRProcessor.from_pretrained("microsoft/trocr-small-printed", Use_fast= False)
     train_dataset = IAMDataset(root_dir=root_dir,
                             df=train_df,

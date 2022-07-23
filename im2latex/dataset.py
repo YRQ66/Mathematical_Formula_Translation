@@ -42,7 +42,7 @@ class IAMDataset(Dataset):
         encoding = {"pixel_values": pixel_values.squeeze(), "labels": torch.tensor(labels)}
         return encoding
 
-def prepare_dataset(data_dir, max_length_token, vocab_size, dataset_type='140K'):
+def prepare_dataset(data_dir, max_length_token, vocab_size, dataset_type='140K',model_path='microsoft/trocr-small-printed'):
 
     dataset_dir = join(data_dir, dataset_type)
     formulas_file = join(dataset_dir, "formulas.txt")
@@ -60,7 +60,7 @@ def prepare_dataset(data_dir, max_length_token, vocab_size, dataset_type='140K')
 
     tokenizer_ = tokenizer(formulas_file = formulas_file, data_dir = data_dir, max_length = max_length_token, vocab_size=vocab_size)
     root_dir = join(dataset_dir, 'images/',) 
-    processor = TrOCRProcessor.from_pretrained("microsoft/trocr-small-printed", Use_fast= False)
+    processor = TrOCRProcessor.from_pretrained(model_path, Use_fast= False)
     train_dataset = IAMDataset(root_dir=root_dir,
                             df=train_df,
                             processor=processor,

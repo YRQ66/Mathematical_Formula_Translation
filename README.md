@@ -34,6 +34,8 @@ iconv -c -f ISO-8859-1 -t utf-8 im2latex_formulas.lst > im2latex_formulas_utf.ls
 │   │   ├── config_eval_ex.yaml
 │   │   └── config_train_ex.yaml
 │   ├── create_dataset
+│   │   ├── latex_crawler.py
+│   │   └── formula_to_image.py # crawler & render
 │   ├── data
 │   │   ├── 100K
 │   │   │   ├── formulas.lst

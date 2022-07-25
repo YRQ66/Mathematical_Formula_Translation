@@ -1,6 +1,4 @@
 import requests
-from selenium import webdriver
-from time import sleep
 from bs4 import BeautifulSoup
 
 from os.path import join

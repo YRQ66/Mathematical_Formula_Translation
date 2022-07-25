@@ -24,7 +24,8 @@ pip install -r requirements.txt
 
 ## Directory Structure
 [IM2LATEX-100K](https://zenodo.org/record/56198#.YtPD1-xBzze)
-[I2L-140K dataset](https://untrix.github.io/i2l/)
+
+[I2L-140K](https://untrix.github.io/i2l/)
 ```
 cd ./data
 iconv -c -f ISO-8859-1 -t utf-8 im2latex_formulas.lst > im2latex_formulas_utf.lst

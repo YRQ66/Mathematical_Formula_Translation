@@ -36,11 +36,11 @@ def get_latex(url, latex_li = []):
 def save_latex(origin_url, save_dir = './formula'):
     # crawl latex
     print('Crwaling LaTeX data....')
-    latex = []
+    latex = set() # 중복 제거
     url_li = [origin_url]
-    url_li.extend(get_url(origin_url)) # url crawling
+    url_li.update(get_url(origin_url)) # url crawling
     for url in tqdm(url_li):
-        latex.extend(get_latex(url)) # latex crawling
+        latex.update(get_latex(url)) # latex crawling
     print('Crawling Done!')
     str_latex = '\n'.join(latex)
     # save

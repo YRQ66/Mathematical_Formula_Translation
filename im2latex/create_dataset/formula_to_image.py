@@ -56,7 +56,7 @@ if __name__=='__main__':
     make_folder(path = data_path)
     # crawling 
     url = "https://ko.wikipedia.org/wiki/%ED%86%B5%EA%B3%84%ED%95%99" # 위키백과 통계학 페이지
-    # save_latex(url)
+    save_latex(url)
 
     formula_path = join(data_path,'formulas')
     formula_li = os.listdir(formula_path)
@@ -64,8 +64,7 @@ if __name__=='__main__':
     print('Start rendering {} files ....'.format(len(formula_li)))
     for i in range(len(formula_li)):
         if formula_li[i].endswith('.txt'):
+            print('Rendering {}'.format(formula_li[i]))
             with open(join(formula_path, formula_li[i]), 'r') as f:
                 formulas = [formula.strip('\n') for formula in f.readlines()]
-                for formula in tqdm(formulas):
-                    formula_to_image(formula, data_path = data_path)
-    
+                [formula_to_image(formula, data_path = data_path) for formula in tqdm(formulas)]

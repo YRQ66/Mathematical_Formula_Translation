@@ -24,7 +24,7 @@ def get_latex(url, latex_li = []):
     soup = BeautifulSoup(req.content, "html.parser")
 
     for line in soup.select("body"):
-        text = soup.find_all('img')
+        text = line.find_all('img')
         for t in text:
             latex = t.get('alt')
             if latex != None and latex.startswith('{\displaystyle'):

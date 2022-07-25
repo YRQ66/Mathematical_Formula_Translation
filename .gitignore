@@ -16,6 +16,6 @@ model/
 personal/
 
 # 추가 데이터셋
-im2latex/create_dataset/formula
-im2latex/create_dataset/image
+im2latex/create_dataset/formulas
+im2latex/create_dataset/images
 im2latex/create_dataset/pdf

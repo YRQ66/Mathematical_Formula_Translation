@@ -38,7 +38,7 @@ def save_latex(origin_url, save_dir = './formula'):
     print('Crwaling LaTeX data....')
     latex = set() # 중복 제거
     url_li = [origin_url]
-    url_li.update(get_url(origin_url)) # url crawling
+    url_li.extend(get_url(origin_url)) # url crawling
     for url in tqdm(url_li):
         latex.update(get_latex(url)) # latex crawling
     print('Crawling Done!')

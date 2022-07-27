@@ -1,11 +1,12 @@
-batch_size: 1
-data_dir: ./data/dataset5/
+data_dir: ./data # after jy's dataset path change
+batch_size: 16
+wandb: True
+name: ex # wandb run name, model save folder name
+model_path:  microsoft/trocr-small-stage1 # user's pretrained weight or hugginface model name
+mode: val
+
+# fixed parameter
 max_length_token: 100
-name: eval_bleu
-num_epoch: 5
 report_step: 100
 seed: 1004
 vocab_size: 600
-wandb: False
-mode: 'val' # 'val' or 'test'
-model_path: 'model/epoch_9'

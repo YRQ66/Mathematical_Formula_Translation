@@ -1,6 +1,5 @@
 import pandas as pd
 from os.path import join
-from this import d
 from preprocess import preprocess_df
 
 # Create and train word level tokenizer

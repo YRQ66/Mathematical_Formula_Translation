@@ -3,7 +3,7 @@ batch_size: 16
 wandb: True
 name: ex # wandb run name, model save folder name
 model_path:  microsoft/trocr-small-stage1 # user's pretrained weight or hugginface model name
-mode: val
+mode: val # val or test
 
 # fixed parameter
 max_length_token: 100

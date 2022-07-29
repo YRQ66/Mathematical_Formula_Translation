@@ -40,7 +40,8 @@ def compute_bleu(args):
   print(torch.cuda.device_count())
 
   train_dataset, val_dataset, test_dataset, tokenizer = \
-  prepare_dataset(data_dir = args['data_dir'], max_length_token=args['max_length_token'], vocab_size=args['vocab_size'])
+  prepare_dataset(data_dir = args['data_dir'], max_length_token=args['max_length_token'], \
+                  vocab_size=args['vocab_size'], processor_path=args['processor_path'])
 
   # train_dataloader = DataLoader(train_dataset, batch_size=args['batch_size'], shuffle=True)
   if args['mode'] == 'val':
@@ -117,11 +118,11 @@ def compute_bleu(args):
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
 
-  parser.add_argument('--config_train', default='config/config_eval.yaml', type=str, help='path of train configuration yaml file')
+  parser.add_argument('--config_eval', default='config/config_eval.yaml', type=str, help='path of train configuration yaml file')
   
   pre_args = parser.parse_args()
 
-  with open(pre_args.config_train) as f:
+  with open(pre_args.config_eval) as f:
     args = yaml.load(f, Loader=yaml.FullLoader)
 
   if args['wandb'] == True:

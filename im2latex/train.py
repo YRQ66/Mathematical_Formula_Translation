@@ -43,7 +43,7 @@ def train(args):
 
   train_dataset, val_dataset, test_dataset, tokenizer = \
   prepare_dataset(data_dir = args['data_dir'], max_length_token=args['max_length_token'], \
-                  vocab_size=args['vocab_size'], model_path=args['model_path'])
+                  vocab_size=args['vocab_size'], processor_path=args['processor_path'])
 
   train_dataloader = DataLoader(train_dataset, batch_size=args['batch_size'], shuffle=True)
   val_dataloader = DataLoader(val_dataset, batch_size=args['batch_size'])
@@ -53,6 +53,7 @@ def train(args):
                         else "mps" if torch.backends.mps.is_available() else "cpu")
 
   print(f"----- Use pretrained weight : {args['model_path']} -----")
+  print(f"----- Use pretrained processor : {args['processor_path']} -----")
   model_config = VisionEncoderDecoderConfig.from_pretrained(args['model_path'])
   model = VisionEncoderDecoderModel.from_pretrained(args['model_path'],
                                   config=model_config)

@@ -43,7 +43,7 @@ def save_url(origin_url, count, save_dir):
     print("Start crawling URL...")
     url_li.add(origin_url)
     get_url(origin_url, count = count)
-    print('Crawling URL Done!')
+    print('Crawling URL Done! Toatl {}'.format(len(url_li)))
 
     new_url = url_li - pre_url_li
 

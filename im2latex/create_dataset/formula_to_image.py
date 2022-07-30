@@ -9,6 +9,8 @@ from latex_crawler import save_latex
 
 DEVNULL = open(os.devnull, "w")
 
+matches = []
+
 def run(cmd, timeout_sec):
     """Run cmd in the shell with timeout"""
     proc = subprocess.Popen(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
@@ -20,9 +22,11 @@ def run(cmd, timeout_sec):
     finally:
         timer.cancel()
 
-def formula_to_image(formula, data_path = './'):
+def formula_to_image(idx, formula, data_path = './'):
     formula = formula.strip("%")
     name = hashlib.sha1(formula.encode('utf-8')).hexdigest()[:15]
+
+    matches.append(str(idx)+','+formula+','+name)
 
     # write formula into a .tex file
     tex_output = join(data_path, 'pdf')
@@ -49,22 +53,33 @@ def make_folder(path):
     for folder in folder_li:
         if not os.path.isdir(join(path, folder)):
             os.mkdir(folder)
-
+    if not os.path.isdir(join(path, 'matches.csv')):
+        open("matches.csv", "w")
 
 if __name__=='__main__':
     data_path = './'
     make_folder(path = data_path)
-    # crawling 
-    url = "https://ko.wikipedia.org/wiki/%ED%86%B5%EA%B3%84%ED%95%99" # 위키백과 통계학 페이지
-    save_latex(url)
 
-    formula_path = join(data_path,'formulas')
-    formula_li = os.listdir(formula_path)
-    # 일단 통계학.lst 로 테스트 -> for문으로 바꾸기 (+렌더링한 txt 파일은 다시 하지 않도록 조건문 넣기)
-    print('Start rendering {} files ....'.format(len(formula_li)))
-    for i in range(len(formula_li)):
-        if formula_li[i].endswith('.txt'):
-            print('Rendering {}'.format(formula_li[i]))
-            with open(join(formula_path, formula_li[i]), 'r') as f:
-                formulas = [formula.strip('\n') for formula in f.readlines()]
-                [formula_to_image(formula, data_path = data_path) for formula in tqdm(formulas)]
+    formula_path = join(data_path,'formulas.txt')
+    rendered_path = join(data_path,'rendered_formulas.txt')
+    # formula_li = os.listdir(formula_path)
+    # +렌더링한 txt 파일은 다시 하지 않도록 조건문 넣기
+    with open(formula_path, 'r') as f:
+        formulas = [formula.strip('\n') for formula in f.readlines()]
+        formulas = set(formulas)
+
+    with open(rendered_path, 'r') as f:
+        renders = [rendered.strip('\n') for rendered in f.readlines()]
+        renders = set(renders)
+
+    remain_formula = formulas - renders
+        
+    print('Start rendering {} formulas ....'.format(len(remain_formula)))
+    [formula_to_image(idx, formula) for idx, formula in enumerate(tqdm(formulas)) if formula not in renders]
+
+    with open(rendered_path, "a") as f:
+        f.write('\n'.join(remain_formula))
+
+    # formula - image name 매칭 데이터프레임
+    with open("matches.csv","a") as f:
+        f.write("\n".join(matches))

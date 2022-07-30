@@ -1,3 +1,4 @@
+import argparse
 import requests
 from bs4 import BeautifulSoup
 
@@ -39,7 +40,7 @@ def save_url(origin_url, count, save_dir):
         pre_url_li = [url.strip('\n') for url in f.readlines()]
         pre_url_li = set(pre_url_li)
 
-    print("Start crawling URL!...")
+    print("Start crawling URL...")
     url_li.add(origin_url)
     get_url(origin_url, count = count)
     print('Crawling URL Done!')
@@ -93,5 +94,9 @@ def save_latex(origin_url, count, save_dir = './'):
     print('Save latex Data!')
 
 if __name__ == "__main__":
-    origin_url = "https://ko.wikipedia.org/wiki/%EC%A0%81%EB%B6%84"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-u", "--url")
+    args = parser.parse_args()
+
+    origin_url = args.url
     save_latex(origin_url, 2)

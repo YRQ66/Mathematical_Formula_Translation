@@ -5,6 +5,7 @@ wandb: False
 name: ex # wandb run name, model save folder name
 model_path:  microsoft/trocr-small-stage1 # user's pretrained weight or hugginface model name
 processor_path: microsoft/trocr-small-stage1 # user's pretrained processor(must save processor) or hugginface model
+dataset_type: 140k
 
 # fixed parameter
 max_length_token: 100

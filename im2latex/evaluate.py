@@ -41,7 +41,7 @@ def compute_bleu(args):
 
   train_dataset, val_dataset, test_dataset, tokenizer = \
   prepare_dataset(data_dir = args['data_dir'], max_length_token=args['max_length_token'], \
-                  vocab_size=args['vocab_size'], processor_path=args['processor_path'])
+                  vocab_size=args['vocab_size'], processor_path=args['processor_path'], dataset_type=args['dataset_type'])
 
   # train_dataloader = DataLoader(train_dataset, batch_size=args['batch_size'], shuffle=True)
   if args['mode'] == 'val':

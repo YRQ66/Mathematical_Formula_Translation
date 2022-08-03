@@ -47,8 +47,6 @@ def prepare_dataset(data_dir, max_length_token, vocab_size, processor_path, data
     dataset_dir = join(data_dir, dataset_type)
     formulas_file = join(dataset_dir, "formulas.txt")
     # linux 인코딩 변환 : iconv -c -f ISO-8859-1 -t utf-8 im2latex_formulas.lst > im2latex_formulas_utf.lst
-    with open(formulas_file, 'r') as f:
-        formulas = [formula.strip('\n') for formula in f.readlines()]
 
     # train_df/test_df/valid_df
     types = ['train', 'valid', 'test']

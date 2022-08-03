@@ -15,6 +15,8 @@ from transformers import AdamW
 from metric import compute_cer
 from metric import get_pred_and_label_str
 from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
+from datasets import load_metric
+cer_metric = load_metric("cer")
 
 import wandb
 import yaml
@@ -106,44 +108,66 @@ def train(args):
         print(f"Loss: {loss.item()}")
         
     print(f"Loss after epoch {epoch}:", train_loss/len(train_dataloader))
-
+    
     # validate
     print(f'Start {epoch}th evaluation!!!')
     model.eval()
-    val_loss = 0.0
+    # val_loss = 0.0
     val_cer = 0.0
+    val_bleu = 0.0
     best_cer = int(1e9)
     with torch.no_grad():
       for i, batch in enumerate(tqdm(val_dataloader)):
         # generate ver.
         # generate output : sequence of token, scores(optional)
         # outputs = model.generate(batch["pixel_values"].to(device))
+        
+        # greedy ver.
+        # prediction = torch.argmax(outputs.logits, dim=2)
+
+        # loss = outputs.loss.item()
+        # val_loss += loss
 
         for k,v in batch.items():
           batch[k] = v.to(device)
         outputs = model(**batch)
-        # greedy 
-        prediction = torch.argmax(outputs.logits, dim=2)
 
-        # compute metrics
-        loss = outputs.loss.item()
-        val_loss += loss
-        cer = compute_cer(pred_ids=prediction, label_ids=batch["labels"], tokenizer=tokenizer)
+        prediction = model.generate(batch["pixel_values"].to(device))
+
+        pred_str, label_str = get_pred_and_label_str(prediction, batch["labels"], tokenizer)
+        cer = cer_metric.compute(predictions=pred_str, references=label_str)
+
+        label_str = [[l] for l in label_str]
+        
+        bleu =  corpus_bleu(
+                label_str, pred_str,
+                weights=(0.25, 0.25, 0.25, 0.25),
+                smoothing_function=SmoothingFunction().method1
+        )
         val_cer += cer
-
-    epoch_loss = val_loss / len(val_dataloader)
+        val_bleu += bleu
+        
+    # epoch_loss = val_loss / len(val_dataloader)
     epoch_cer = val_cer / len(val_dataloader)
-    print(f"{epoch}th epoch Val Loss:{epoch_loss}")
+    epoch_bleu = val_bleu / len(val_dataloader)
+
+    # print(f"{epoch}th epoch Val Loss:{epoch_loss}")
     print(f"{epoch}th epoch Val CER:{epoch_cer}")
+    print(f"{epoch}th epoch Val BLEU:{epoch_bleu}")
     if args['wandb'] == True:
-      wandb.log({'Val/val_loss': epoch_loss, 
-                  'Val/val_cer': epoch_cer, 
+      wandb.log({
+                  # 'Val/val_loss': epoch_loss, 
+                  'Val/val_cer': epoch_cer,
+                  'Val/val_bleu': epoch_bleu,
                   'epoch':epoch}, step=step)
+
+    # if epoch_cer < best_cer:
+    #   best_cer = epoch_cer
+    #   model.save_pretrained(f"model/{args['name']}/epoch_{epoch}")
+    #   processor.save_pretrained(f"model/{args['name']}/epoch_{epoch}")
     
-    if epoch_cer < best_cer:
-      best_cer = epoch_cer
-      model.save_pretrained(f"model/{args['name']}/epoch_{epoch}")
-      processor.save_pretrained(f"model/{args['name']}/epoch_{epoch}")
+    model.save_pretrained(f"model/{args['name']}/ep{epoch}_b{epoch_bleu:.2f}_c{epoch_cer:.2f}")
+    processor.save_pretrained(f"model/{args['name']}/ep{epoch}_b{epoch_bleu:.2f}_c{epoch_cer:.2f}")
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()

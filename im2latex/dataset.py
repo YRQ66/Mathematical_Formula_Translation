@@ -28,7 +28,7 @@ class IAMDataset(Dataset):
         text = self.df['formula'][idx]
         # prepare image (i.e. resize + normalize)
         # image = Image.open(self.root_dir + file_name +'.png').convert("RGB")
-        image = Image.open(self.root_dir + file_name).convert("RGB")
+        image = Image.open(self.root_dir + file_name+'.png').convert("RGB")
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
 #        # add labels (input_ids) by encoding the text
 #        labels = self.processor.tokenizer(text, 

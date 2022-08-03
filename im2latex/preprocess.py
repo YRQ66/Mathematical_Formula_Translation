@@ -35,6 +35,6 @@ if __name__ == '__main__':
     # train_df/test_df/validate_df
     types = ['train', 'valid', 'test']
     for type in types:
-        df = preprocess_df(formulas, data_dir=args.data_dir, type = type, max_length_token=args.max_length_token)
+        df = preprocess_df(data_dir=args.data_dir, type = type, max_length_token=args.max_length_token)
         globals()["{}_df".format(type)] = df
         print(type+'_dataframe',df.head())

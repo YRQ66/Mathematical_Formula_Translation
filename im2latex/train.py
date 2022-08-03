@@ -160,7 +160,7 @@ def train(args):
                   'Val/val_cer': epoch_cer,
                   'Val/val_bleu': epoch_bleu,
                   'epoch':epoch}, step=step)
-    
+
     # if epoch_cer < best_cer:
     #   best_cer = epoch_cer
     #   model.save_pretrained(f"model/{args['name']}/epoch_{epoch}")
@@ -168,8 +168,6 @@ def train(args):
     
     model.save_pretrained(f"model/{args['name']}/ep{epoch}_b{epoch_bleu:.2f}_c{epoch_cer:.2f}")
     processor.save_pretrained(f"model/{args['name']}/ep{epoch}_b{epoch_bleu:.2f}_c{epoch_cer:.2f}")
-    
-
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()

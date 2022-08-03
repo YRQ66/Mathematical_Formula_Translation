@@ -5,8 +5,6 @@ import subprocess
 from threading import Timer
 from tqdm import tqdm
 
-# from latex_crawler import save_latex
-
 DEVNULL = open(os.devnull, "w")
 
 matches = []
@@ -63,7 +61,7 @@ if __name__=='__main__':
     formula_path = join(data_path,'formulas.txt')
     rendered_path = join(data_path,'rendered_formulas.txt')
     # formula_li = os.listdir(formula_path)
-    # +렌더링한 txt 파일은 다시 하지 않도록 조건문 넣기
+    # +렌더링한 txt 파일은 다시 하지 않도록 (formula - rendered_formula)
     with open(formula_path, 'r') as f:
         formulas = [formula.strip('\n') for formula in f.readlines()]
         formulas = set(formulas)

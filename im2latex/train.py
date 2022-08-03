@@ -12,7 +12,6 @@ from dataset import prepare_dataset
 
 from transformers import AdamW
 
-from metric import compute_cer
 from metric import get_pred_and_label_str
 from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
 from datasets import load_metric

@@ -72,7 +72,7 @@ def get_latex(url):
                 latex_li.add(latex)
     return latex_li
 
-def save_latex(origin_url, count, save_dir = './'):
+def save_latex(origin_url, count, save_dir = './data'):
     # url_li 안의 모든 url의 latex 코드 크롤링 (crawl_save_latex > get_latex)
 
     # Crawling URL
@@ -80,6 +80,7 @@ def save_latex(origin_url, count, save_dir = './'):
 
     # with open('url.lst','r') as f:
     #     new_url = [url.strip('\n') for url in f.readlines()]
+    
     # Crwaling LaTeX
     print('Crawling LaTeX data....')
     latex = set() # 중복 제거
@@ -100,8 +101,8 @@ def save_latex(origin_url, count, save_dir = './'):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-u", "--url", default='./')
+    parser.add_argument("-u", "--origin_url", default='./data')
     parser.add_argument("-d","--depth", default = 2)
     args = parser.parse_args()
 
-    save_latex(args.url, int(args.depth))
+    save_latex(args.origin_url, int(args.depth))

@@ -55,7 +55,7 @@ def make_folder(path):
         open("matches.csv", "w")
 
 if __name__=='__main__':
-    data_path = './'
+    data_path = './data'
     make_folder(path = data_path)
 
     formula_path = join(data_path,'formulas.txt')

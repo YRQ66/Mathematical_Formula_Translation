@@ -71,7 +71,7 @@ def prepare_dataset(data_dir, max_length_token, vocab_size, processor_path, data
                             df=test_df,
                             processor=processor,
                             tokenizer=tokenizer_)
-    return train_dataset, val_dataset, test_dataset, tokenizer_
+    return train_dataset, val_dataset, test_dataset, tokenizer_, processor
 
 if __name__ == '__main__':
     import argparse

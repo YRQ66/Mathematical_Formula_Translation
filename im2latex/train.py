@@ -41,7 +41,7 @@ def train(args):
   print(torch.cuda.get_device_name(0))
   print(torch.cuda.device_count())
 
-  train_dataset, val_dataset, test_dataset, tokenizer = \
+  train_dataset, val_dataset, test_dataset, tokenizer, processor = \
   prepare_dataset(data_dir = args['data_dir'], max_length_token=args['max_length_token'], \
                   vocab_size=args['vocab_size'], processor_path=args['processor_path'])
 
@@ -143,6 +143,7 @@ def train(args):
     if epoch_cer < best_cer:
       best_cer = epoch_cer
       model.save_pretrained(f"model/{args['name']}/epoch_{epoch}")
+      processor.save_pretrained(f"model/{args['name']}/epoch_{epoch}")
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()

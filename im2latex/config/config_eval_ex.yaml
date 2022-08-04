@@ -1,4 +1,4 @@
-data_dir: ./data # after jy's dataset path change
+data_dir: .\data # after jy's dataset path change
 batch_size: 1
 wandb: False
 name: ex # wandb run name, model save folder name

@@ -29,7 +29,9 @@ class IAMDataset(Dataset):
         # prepare image (i.e. resize + normalize)
         # image = Image.open(self.root_dir + file_name +'.png').convert("RGB")
         image_path = join(self.root_dir, file_name+'.png')
-        if not isfile(image_path): return None
+        if not isfile(image_path):
+            index = index - 1 if index > 0 else index + 1 
+            return self.__getitem__(index)
         image = Image.open(join(self.root_dir, file_name+'.png')).convert("RGB")
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
 #        # add labels (input_ids) by encoding the text

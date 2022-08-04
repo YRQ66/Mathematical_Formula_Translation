@@ -1,6 +1,5 @@
 import torch
 from torch.utils.data import DataLoader
-from torch.utils.data.dataloader import default_collate
 
 from transformers import VisionEncoderDecoderModel, VisionEncoderDecoderConfig
 
@@ -48,9 +47,9 @@ def train(args):
   prepare_dataset(data_dir = args['data_dir'], max_length_token=args['max_length_token'], \
                   vocab_size=args['vocab_size'], processor_path=args['processor_path'], dataset_type=args['dataset_type'])
 
-  train_dataloader = DataLoader(train_dataset, batch_size=args['batch_size'], shuffle=True, collate_fn=default_collate)
-  val_dataloader = DataLoader(val_dataset, batch_size=args['batch_size'], collate_fn=default_collate)
-  test_dataloader = DataLoader(test_dataset, batch_size=args['batch_size'], collate_fn=default_collate)
+  train_dataloader = DataLoader(train_dataset, batch_size=args['batch_size'], shuffle=True)
+  val_dataloader = DataLoader(val_dataset, batch_size=args['batch_size'])
+  test_dataloader = DataLoader(test_dataset, batch_size=args['batch_size'])
 
   device = torch.device("cuda" if torch.cuda.is_available() \
                         else "mps" if torch.backends.mps.is_available() else "cpu")

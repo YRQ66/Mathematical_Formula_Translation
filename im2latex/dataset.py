@@ -28,7 +28,7 @@ class IAMDataset(Dataset):
         text = self.df['formula'][idx]
         # prepare image (i.e. resize + normalize)
         # image = Image.open(self.root_dir + file_name +'.png').convert("RGB")
-        image = Image.open(self.root_dir + file_name+'.png').convert("RGB")
+        image = Image.open(join(self.root_dir, file_name+'.png')).convert("RGB")
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
 #        # add labels (input_ids) by encoding the text
 #        labels = self.processor.tokenizer(text, 
@@ -57,7 +57,7 @@ def prepare_dataset(data_dir, max_length_token, vocab_size, processor_path, data
         
 
     tokenizer_ = tokenizer(formulas_file = formulas_file, data_dir = data_dir, max_length = max_length_token, vocab_size=vocab_size)
-    root_dir = join(dataset_dir, 'images/',) 
+    root_dir = join(dataset_dir, 'images') 
     processor = TrOCRProcessor.from_pretrained(processor_path, Use_fast= False)
     train_dataset = IAMDataset(root_dir=root_dir,
                             df=train_df,
@@ -75,28 +75,21 @@ def prepare_dataset(data_dir, max_length_token, vocab_size, processor_path, data
 
 if __name__ == '__main__':
     import argparse
+    import yaml
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--data_dir", default='./data')
-    # tokenize
-    parser.add_argument("-m", "--max_length_token", default=100)
-    parser.add_argument("-v", "--vocab_size", default=600)
-    # dataset
-    parser.add_argument("-b", "--batch_size", default=16)
-    args = parser.parse_args()
 
-    train_dataset, val_dataset, test_dataset, tokenizer = prepare_dataset(data_dir = args.data_dir, max_length_token=args.max_length_token, vocab_size=args.vocab_size)
-    
+    parser.add_argument('--config_train', default='config/config_train.yaml', type=str, help='path of train configuration yaml file')
+
+    pre_args = parser.parse_args()
+
+    with open(pre_args.config_train) as f:
+        args = yaml.load(f, Loader=yaml.FullLoader)
+
+    train_dataset, val_dataset, test_dataset, tokenizer, processor = \
+    prepare_dataset(data_dir = args['data_dir'], max_length_token=args['max_length_token'], \
+                    vocab_size=args['vocab_size'], processor_path=args['processor_path'], dataset_type=args['dataset_type'])
+
     print("Number of training examples:", len(train_dataset))
     print("Number of validation examples:", len(val_dataset))
     print("Number of test examples:", len(test_dataset))
 
-    encoding = train_dataset[0]
-    for k,v in encoding.items():
-        print(k, v.shape)
-    labels = encoding['labels']
-    labels[labels == -100] = tokenizer.token_to_id("[PAD]")
-    label_str = tokenizer.decode(labels.tolist(), skip_special_tokens=True)
-
-    train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
-    val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=True)
-    test_dataloader = DataLoader(test_dataset, batch_size=args.batch_size)

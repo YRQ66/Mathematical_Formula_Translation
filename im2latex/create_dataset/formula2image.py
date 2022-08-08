@@ -47,12 +47,14 @@ def formula_to_image(idx, formula, data_path = './'):
         10)
 
 def make_folder(path):
-    folder_li = ['formulas', 'pdf', 'images']
+    folder_li = ['pdf', 'images']
     for folder in folder_li:
         if not os.path.isdir(join(path, folder)):
             os.mkdir(folder)
     if not os.path.isdir(join(path, 'matches.csv')):
         open("matches.csv", "w")
+    if not os.path.isdir(join(path, 'rendered_formulas.txt')):
+        open("rendered_formulas.txt", "w")
 
 if __name__=='__main__':
     data_path = './data'

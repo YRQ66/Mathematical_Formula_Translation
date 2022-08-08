@@ -80,7 +80,7 @@ def save_latex(origin_url, count, save_dir = './data'):
 
     # with open('url.lst','r') as f:
     #     new_url = [url.strip('\n') for url in f.readlines()]
-    
+
     # Crwaling LaTeX
     print('Crawling LaTeX data....')
     latex = set() # 중복 제거
@@ -95,6 +95,10 @@ def save_latex(origin_url, count, save_dir = './data'):
         # save
     str_latex = '\n'.join(latex)
     pth = join(save_dir, 'formulas.txt')
+
+    if not os.path.isfile(pth):
+        open(pth, 'w')
+
     with open(pth, "a") as f:
         f.write(str_latex)
     print('Save latex Data!')

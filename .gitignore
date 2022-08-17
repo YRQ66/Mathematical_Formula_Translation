@@ -1,5 +1,6 @@
 # Mac
 .DS_Store
+
 im2latex/data
 *.json
 *.yaml
@@ -16,9 +17,4 @@ model/
 personal/
 
 # 추가 데이터셋
-im2latex/create_dataset/formulas.txt
-im2latex/create_dataset/rendered_formulas.txt
-im2latex/create_dataset/url.lst
-im2latex/create_dataset/matches.csv
-im2latex/create_dataset/images
-im2latex/create_dataset/pdf
+im2latex/create_dataset/data/
